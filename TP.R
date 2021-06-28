@@ -6,7 +6,7 @@ library(rattle)
 
 zooDataset <- read.csv('Dataset/zoo.data')
 zooDataset[,"type"] <- as.factor(zooDataset[,"type"])
-zooDataset <- zooDataset[2:18]
+#zooDataset <- zooDataset[2:18]
 
 indexData <- createFolds(t(zooDataset[,"type"]), k=5)
 zooDatasetTest <- zooDataset[indexData[[3]],]
@@ -21,7 +21,6 @@ fit3 <- rpart(type ~ hair+milk+airborne+aquatic+predator+toothed+backbone+breath
 fit4 <- rpart(type ~ hair+feathers+milk+predator+toothed+backbone+fins, data=zooDatasetTrain, parms=list(split = 'gini'))
 fit <- rpart(type ~ feathers+milk+airborne+backbone+fins+tail, data=zooDatasetTrain, parms=list(split = 'gini'))
 fitAll <- rpart(type ~ hair+feathers+eggs+milk+airborne+aquatic+predator+toothed+backbone+breathes+venomous+fins+legs+tail+domestic+catsize, data=zooDatasetTrain, parms=list(split = 'gini'))
-fitAll <- rpart(type ~ ., data=zooDatasetTrain, parms=list(split = 'gini'))
 fitPerfect <- rpart(type ~ feathers+milk+backbone+fins, data=zooDatasetTrain, parms=list(split = 'gini'))
 
 fancyRpartPlot(fit1, caption="fit1")
@@ -56,6 +55,23 @@ confusionMatrix(predictZooAll, zooDatasetTest[,"type"])
 
 predictZooPerfect <- predict(fitPerfect, zooDatasetTest[,-18], type = 'class') # acc = .9
 confusionMatrix(predictZooPerfect, zooDatasetTest[,"type"])
-
 # predictZoo <- predict(fitPerfect, zooDataset[,-18], type = 'class')
 # confusionMatrix(predictZoo, zooDataset[,"type"])
+
+# ======================================= Plot CMatrix =================================================================
+# library(dplyr)
+# 
+# table <- data.frame(confusionMatrix(predictZooPerfect, zooDatasetTest[,"type"])$table)
+# 
+# plotTable <- table %>%
+#   mutate(goodbad = ifelse(table$Prediction == table$Reference, "good", "bad")) %>%
+#   group_by(Reference) %>%
+#   mutate(prop = Freq/sum(Freq))
+# 
+# ggplot(data = plotTable, mapping = aes(x = Reference, y = Prediction, fill = goodbad, alpha = prop)) +
+#   geom_tile() +
+#   geom_text(aes(label = Freq), vjust = .5, fontface  = "bold", alpha = 1) +
+#   scale_fill_manual(values = c(good = "green", bad = "red")) +
+#   theme_bw() +
+#   xlim(rev(levels(table$Reference)))
+# ======================================================================================================================
